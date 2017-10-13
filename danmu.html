@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>弹幕</title>
+</head>
+<body>
+<!--<div>背景，一般是视频</div>-->
+<canvas id="danmu" width="400" height="400" style="margin-top: 100px;"></canvas>
+<script>
+    var data=[
+        {value:'ceshi'},
+        {value:'前方高能'},
+        {value:'哇好甜啊'},
+        {value:'哇好帅好帅'},
+        {value:6666},
+        {value:'厉害了'},
+        {value:666},
+        {value:'好苏'}
+    ];
+    //每一弹幕搞一个实例
+    var canvas = document.getElementById('danmu');
+    var ctx=canvas.getContext("2d");
+    ctx.fillStyle="orange";
+    ctx.font="25px Arial";
+    var store = {};
+
+    data.forEach(function (obj,index) {
+        store[index]=new Danmu(obj,index);
+    });
+    function Danmu (obj,index) {
+        this.y = (index+1)*30;
+        this.value = obj.value;
+        ctx.fillText(obj.value, 100,this.y);
+    };
+    clearInterval(window.scroll_timer);
+    var funcs = [],
+        i=1;
+    window.scroll_timer = setInterval(function () {
+        for(let index in store){
+            i++;
+            ctx.clearRect(0,0,400,400);
+            funcs[index] = function(){//闭包
+                return function () {
+                    ctx.fillText(store[index].value, 100-5*i,store[index].y);
+                }
+            }
+        }
+        for(let index in store){
+            funcs[index]()()
+        }
+    },2000);
+</script>
+</body>
+</html>
