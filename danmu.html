@@ -7,7 +7,16 @@
 <body>
 <!--<div>背景，一般是视频</div>-->
 <canvas id="danmu" width="400" height="400" style="margin-top: 100px;"></canvas>
+<div>
+    <input type="text" placeholder="请输入弹幕文字" id="text">
+    <button id="add">发送弹幕</button>
+</div>
+
 <script>
+    //多组数据处理，假设每秒查询一次
+    //效率的提升：销毁闭包实例
+    //解决弹幕文字重叠问题，计算字体宽度
+    //即时发送弹幕
     var data=[
         {value:'ceshi'},
         {value:'前方高能'},
@@ -18,6 +27,19 @@
         {value:666},
         {value:'好苏'}
     ];
+    setTimeout(function () {
+        data.push(
+            {value:'我爱小仙女~~'},
+            {value:'男神，你看到我的星星眼了咩~~'},
+            {value:'我爱小仙女~~'},
+            {value:'小仙女由我来守护！'},
+            {value:'告诉爸爸你是怎么做到的'},
+            {value:'为啥审核老是不通过'},
+            {value:'郁闷死爸爸了'},
+            {value:'今天是周五了呢！'},
+            {value:'一大波僵尸即将来袭！'}
+        );
+    },5000);
     //每一弹幕搞一个实例
     var canvas = document.getElementById('danmu');
     var ctx=canvas.getContext("2d");
@@ -25,31 +47,81 @@
     ctx.font="25px Arial";
     var store = {};
 
-    data.forEach(function (obj,index) {
-        store[index]=new Danmu(obj,index);
-    });
+    setInterval(function () {
+        data.forEach(function (obj,index) {
+//        ctx.fillText(value.value, 100,200*(Math.random()+1));
+            if(store[index]===undefined){//给新push进来的弹幕创建实例
+                store[index]=new Danmu(obj,index);
+            }
+
+        });
+    },1000);
+
+
     function Danmu (obj,index) {
-        this.y = (index+1)*30;
+        this.y = (index%13+1)*30;
         this.value = obj.value;
-        ctx.fillText(obj.value, 100,this.y);
+        this.x=100;
+        var lastDataIndex = index%13;
+
+        if(data[lastDataIndex] && index>12){
+            this.x=100 + data[lastDataIndex].value.toString().length*16;//一定要先转字符串，不然数字弹幕没法获取length
+        }
+        if(data[index].color){
+            ctx.fillStyle=data[index].color;
+        }
+
+        ctx.fillText(obj.value, this.x,this.y);
+        ctx.fillStyle="orange";//只要自己发的那一行变色
     };
-    clearInterval(window.scroll_timer);
-    var funcs = [],
-        i=1;
+
+
+    var funcs = [];
     window.scroll_timer = setInterval(function () {
         for(let index in store){
-            i++;
             ctx.clearRect(0,0,400,400);
-            funcs[index] = function(){//闭包
+            funcs[index] = function(){//闭包，这样写出来的文字就不会都是一样的了
                 return function () {
-                    ctx.fillText(store[index].value, 100-5*i,store[index].y);
+                    if(store[index] && store[index].x > 0){
+                        store[index].x = store[index].x-20;
+                        if(data[index].color){
+                            ctx.fillStyle=data[index].color;
+                        }
+                        ctx.fillText(store[index].value, store[index].x,store[index].y);
+                        ctx.fillStyle="orange";
+                    }
+                    else{
+                        store[index] = null;
+//                        clearInterval(window.scroll_timer);//setInterval停止执行
+                    }
                 }
             }
         }
         for(let index in store){
             funcs[index]()()
         }
+
+
     },2000);
+
+function addDanmu() {
+    var add = document.getElementById('add');
+    add.onclick = function () {
+        var text = document.getElementById('text'),
+            val = text.value;
+        if(val != ""&& data && Array.isArray(data)){
+            var obj = {
+                value:val,
+                color:'red'
+            };
+            data.push(obj);
+            text.value = "";
+        }
+    }
+}
+
+addDanmu();
+
 </script>
 </body>
 </html>
