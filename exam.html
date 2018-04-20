@@ -1,0 +1,169 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+    .delete{
+        display: none;
+    }
+    #list{
+        overflow: hidden;
+    }
+
+    input[type=checkbox]{
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        padding-left: 40px;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        line-height: 32px;
+        cursor: pointer;
+        background-image:url(http://csscheckbox.com/checkboxes/u/csscheckbox_d2a60beb8fb6bbb280642579049ebf65.png);
+    }
+    @media screen and (max-width: 768px) {
+        #list p{
+            width:100%;
+        }
+    }
+    @media screen and (min-width: 768px)and(max-width: 992px) {
+        #list p{
+            float:left;
+            width:50%;
+        }
+    }
+    @media screen and (min-width: 992px)and(max-width: 1200px) {
+        #list p{
+            float:left;
+            width:33.3%;
+        }
+    }
+    @media screen and (min-width: 1200px){
+        #list p{
+            float:left;
+            width:20%;
+        }
+    }
+</style>
+</head>
+<body>
+    <input type="" name="" id="addTxt" value="请输入内容">
+
+    <p>
+        <input type="checkbox" name="" id="all">
+        全选
+        <i id="delAll">删除</i>
+    </p>
+    <div id="list">
+        
+    </div>
+<script type="text/javascript">
+    var add_txt = document.getElementById('addTxt'),//addEventListener
+        list = document.getElementById('list'),
+        all = document.getElementById('all');
+
+        var flag = false;
+        var o={};
+        var val;
+
+        var node = [];
+
+        var ele = localStorage.getItem('item');
+        console.log("ele:"+ele);
+        if(ele){
+            var newEle = JSON.parse(ele);
+            console.log("数组");
+            console.log(newEle);
+            for(var i=0,len=newEle.length;i<len;i++){
+                var item = document.createElement('p');
+                item.innerHTML = newEle[i];
+                list.appendChild(item);
+            }
+        }
+
+        //回车添加
+    add_txt.addEventListener('keydown',function(e){
+        if(e.keyCode == 13){
+            var item = document.createElement('p');
+            var str = "<input type='checkbox'>" + add_txt.value + "<i class='delete'>删除</i>";
+            item.innerHTML = str;
+            console.log(item);
+            //保存节点
+            console.log("保存节点");
+            node.push(str);
+            console.log(node);
+            localStorage.setItem('item', JSON.stringify(node));
+            list.appendChild(item);
+        }
+    });
+    //hover删除
+    list.addEventListener('mouseover',function(e){
+        var tar = e.target;
+        if(tar.tagName.toLowerCase() == 'p'){
+            var i = tar.children[1];
+            console.log(i);
+            i.style.display="block";
+        }
+        
+    });
+    //删除
+    list.addEventListener('click',function(e){
+        var tar = e.target;
+        if(tar.tagName.toLowerCase() == 'i'){
+            if(window.confirm('是否确认删除？')){
+                var p = tar.parentElement;
+                console.log(p);
+                list.removeChild(p);
+            }
+        }
+
+        //联动
+        if(tar.tagName.toLowerCase() == 'input'){
+            o.flag = tar.checked;
+        }
+        
+    });
+    //全选
+   
+    all.onclick=function(e){
+        flag = !flag;
+        var lists = list.children;
+        for(var i=0,len=lists.length;i<len;i++){
+            console.log(lists[i].children[0]);
+            lists[i].children[0].checked = flag;
+        }
+    };
+    delAll.onclick=function(){
+        console.log('全删');
+        while (list.children.length > 0 ){
+            list.removeChild(list.children[0]);
+        }
+    };
+
+    //联动
+    Object.defineProperty(o, "flag",
+        {
+            get : function(){
+                return val;
+            },
+            set : function(newValue){
+                val = newValue;
+                //联动
+                if(newValue){
+                    all.checked = newValue;
+                }else{
+                    var lists = list.children;
+                    for(var i=0,len=lists.length;i<len;i++){
+                        if(lists[i].children[0].checked){
+                            console.log('联动');
+                            all.checked = true;
+                            return;
+                        }
+                    }
+                    all.checked = newValue;
+                }
+            }
+        }
+    );
+</script>
+</body>
+</html>
