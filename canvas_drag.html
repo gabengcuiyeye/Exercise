@@ -1,0 +1,93 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <canvas id="myCanvas" width="320" height="620"
+        style="position: absolute;top: 100px;left: 100px;background: burlywood;"></canvas>
+    <script type="text/javascript">
+        var cvs = document.getElementById('myCanvas');
+        var ctx = cvs.getContext('2d');
+
+        let arr = [{
+            fillStyle: "green",
+            method: "fillRect",
+            coordinateAndSize: [10, 10, 150, 100],
+            currentX: 10,
+            currentY: 10,
+            width: 150,
+            height: 100,
+        },
+        {
+            fillStyle: "yellow",
+            method: "strokeRect",
+            coordinateAndSize: [100, 100, 150, 100],
+            currentX: 100,
+            currentY: 100,
+            width: 150,
+            height: 100,
+        }
+        ];
+
+
+
+        function draw() {
+            arr.forEach(list => {
+                ctx.fillStyle = list.fillStyle;
+                ctx[list.method](list.currentX,list.currentY,list.width,list.height);
+            })
+        }
+
+        draw();
+
+        //鼠标按下事件
+        //模拟拖拽canvas图形事件
+        var mousedownFlag = false, topShape;
+
+        cvs.addEventListener("mousedown", e => {
+            //判断有没有点击到图形
+            //需要得到鼠标的位置
+            let x = e.clientX + document.body.scrollLeft - cvs.offsetLeft, y = e.clientY + document.body.scrollTop - cvs.offsetTop;
+            arr.forEach(list => {
+                if (isInsideRect(list.currentX, list.currentY, list.width, list.height, x, y)) {
+                    mousedownFlag = true;
+                    topShape = list;
+                }
+            })
+
+        })
+
+        cvs.addEventListener("mousemove", e => {
+            //图形随着鼠标动
+            //考虑多个图形，只移动最上面一个
+            window.timeoutId = setTimeout(() => {
+                if (mousedownFlag) {
+                    ctx.clearRect(0, 0, 320, 620);
+                    topShape.currentX = e.clientX + document.body.scrollLeft - cvs.offsetLeft - topShape.width / 2;
+                    topShape.currentY = e.clientY + document.body.scrollTop - cvs.offsetTop - topShape.height / 2;
+                    draw();
+                }
+            }, 200)
+
+        })
+
+        cvs.addEventListener("mouseup", e => {
+            if (mousedownFlag) {
+                mousedownFlag = false;
+                topShape = null;
+                clearInterval(window.timeoutId);
+            }
+        })
+
+
+        function isInsideRect(x0, y0, width, height, x, y) {
+            return x >= x0 && x <= x0 + width && y >= y0 && y <= y0 + height;
+        }
+
+
+    </script>
+
+</body>
+
+</html>
