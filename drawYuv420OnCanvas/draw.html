@@ -1,0 +1,99 @@
+<html>
+
+<head></head>
+
+<body>
+    <canvas id="canvas" width="352" height="288"></canvas>
+    <script>
+        const WIDTH = 352;
+        const HEIGHT = 288;
+        const unit = 352 * 288 * 3 / 2;//共250帧
+
+        function getYUV(range = `0-${352 * 288 * 3 / 2}`, cb = () => { }) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/getYUV");
+            xhr.setRequestHeader('Range', `bytes=${range}`);
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+            xhr.onreadystatechange = function (e) {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200 || xhr.status == 304) {
+                        var arrayBuffer = xhr.response; // 注意:不是oReq.responseText
+                        if (arrayBuffer) {
+                            var byteArray = new Uint8Array(arrayBuffer);
+                            cb(byteArray, xhr);
+                        }
+                    }
+                }
+            };
+
+        }
+
+        function draw(reqRange) {
+            getYUV(reqRange, (data, xhr) => {
+                const progRGB = yuv420ProgPlanarToRgb(data, WIDTH, HEIGHT)
+                const canvas = document.getElementById("canvas");
+                const ctx = canvas.getContext("2d")
+                const imageData = ctx.createImageData(WIDTH, HEIGHT)
+                putRGBToRGBA(imageData.data, progRGB, WIDTH, HEIGHT)
+                ctx.putImageData(imageData, 0, 0);
+
+                //请求下一帧，后续做成socket
+                setTimeout(() => {
+                    let contentRange = xhr.getResponseHeader("Content-Range");
+                    let resRange = contentRange.replace(/bytes.*-/, '').split("/");
+
+                    if (+resRange[0] == +resRange[1] || +resRange[0] > +resRange[1]) return;//说明数据已经全部请求完成
+                    let reqRange = `${+resRange[0]}-${parseInt(resRange[0]) + unit}`;
+                    draw(reqRange);
+                }, 50)
+            })
+        }
+
+
+
+        let test = `${0 * unit}-${1 * unit}`
+        draw(test);
+
+
+        function yuv420ProgPlanarToRgb(yuv, width, height) {
+            const frameSize = width * height;
+            const halfWidth = Math.floor(width / 2);
+            const uStart = frameSize;
+            const vStart = frameSize + Math.floor(frameSize / 4);
+            const rgb = [];
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const yy = yuv[y * width + x];
+                    const colorIndex = Math.floor(y / 2) * halfWidth + Math.floor(x / 2);
+                    const uu = yuv[uStart + colorIndex] - 128;
+                    const vv = yuv[vStart + colorIndex] - 128;
+                    let r = yy + 1.402 * vv;
+                    let g = yy - 0.344 * uu - 0.714 * vv;
+                    let b = yy + 1.772 * uu;
+
+                    rgb.push(...[r, g, b]);
+                }
+            }
+
+            return rgb
+        }
+
+        function putRGBToRGBA(rgba, rgb, width, height) {
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const index = y * width + x
+                    const indexRGB = index * 3
+                    const indexRGBA = index * 4
+                    rgba[indexRGBA + 0] = rgb[indexRGB + 0] // r
+                    rgba[indexRGBA + 1] = rgb[indexRGB + 1] // g
+                    rgba[indexRGBA + 2] = rgb[indexRGB + 2] // b
+                    rgba[indexRGBA + 3] = 255 // alpha
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>
