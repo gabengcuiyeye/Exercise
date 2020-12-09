@@ -12,7 +12,7 @@ for (var i = 0; i < int32View.length; i++) {
 
 
 
-//以下仅考虑简单实现
+//以下仅考虑简单实现 
 function serialize(obj) {
     let buffer = new ArrayBuffer(10000);
     let dataView = new DataView(buffer);
@@ -20,20 +20,20 @@ function serialize(obj) {
 
     Object.keys(obj).forEach((key, index) => {
 
-        if (typeof obj[key] === 'string') {
+        if (typeof obj[key] === 'string') {//默认utf-8编码（1-4字节）
             dataView.setInt8(pos + 1, dataPos);//start
             let len = obj[key].length;
             for (i = 0; i < len; i++) {
-                dataView.setInt16(dataPos, obj[key].charCodeAt(i));//字符串charCodeAt最大2的16次方
+                dataView.setInt16(dataPos, obj[key].charCodeAt(i));
                 dataPos += 2;
             }
             dataView.setInt8(pos, 1);//type
             dataView.setInt8(pos + 2, dataPos);//end
             pos += 3;
 
-        } else if (typeof obj[key] === 'number') {
+        } else if (typeof obj[key] === 'number') {//字节数和数字实际大小有关，假设255以内整数
             dataView.setInt8(pos + 1, dataPos);//start  
-            dataView.setFloat64(dataPos, obj[key]);
+            dataView.setInt8(dataPos, obj[key]);
             dataPos += 8;
             dataView.setInt8(pos, 2);//type
             dataView.setInt8(pos + 2, dataPos);//end
@@ -76,7 +76,7 @@ function deserialize(dataView) {
             }
             obj.a = val;
         } else if (type == 2) {
-            obj.b = dataView.getFloat64(start);
+            obj.b = dataView.getInt8(start);
         } else if (type == 3) {
             obj.c = dataView.getInt8(start) == 1 ? true : false;
         }
@@ -87,8 +87,8 @@ function deserialize(dataView) {
 
 
 function run() {
-    let encodeData = serialize({ a: 'hi', b: 2, c: false });
-    console.log(encodeData);
+    let encodeData = serialize({ a: 'hello', b: 30, c: false });
+    // console.log(encodeData);
     let decodeData = deserialize(encodeData);
     console.log(decodeData);
 }
