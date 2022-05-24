@@ -1,8 +1,8 @@
 
 function map_title(htmlStr) {
-    var tag_arr = ['h1','h2','h3','h4','h5','h6','p','div','span','button','ol','ul','li','strong'];
-    for(var i=0,len=tag_arr.length;i<len;i++){
-        switch (tag_arr[i]){
+    var tag_arr = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div', 'span', 'button', 'ol', 'ul', 'li', 'strong'];
+    for (var i = 0, len = tag_arr.length; i < len; i++) {
+        switch (tag_arr[i]) {
             case 'h1':
                 var reg = /<h1.*?(class=("(.*?)"|'(.*?)'))?>(.*?)<\/h1>/;
                 break;
@@ -47,19 +47,19 @@ function map_title(htmlStr) {
                 break;
         }
         var arr = htmlStr.match(reg);
-        while (arr){
+        while (arr) {
             var cls = "";
-            if(arr[3]){
-                cls=arr[3];
-            }else if(arr[4]){
-                cls=arr[4];
+            if (arr[3]) {
+                cls = arr[3];
+            } else if (arr[4]) {
+                cls = arr[4];
             }
             var obj = {
-                cls:cls,
-                type:tag_arr[i],
-                content:arr[5]?arr[5]:""
+                cls,
+                type: tag_arr[i],
+                content: arr[5] ? arr[5] : ""
             };
-            htmlStr = htmlStr.replace(reg,JSON.stringify(obj));
+            htmlStr = htmlStr.replace(reg, JSON.stringify(obj));
             arr = htmlStr.match(reg);
         }
     }
@@ -69,23 +69,23 @@ function map_img(htmlStr) {
     var reg = /<img.*?src="(.*?)"|'(.*?)'.*?>/,//匹配SRC，因为不知道顺序？
         arr = htmlStr.match(reg);
 
-    while(arr){
-        var  src = arr[2]?arr[2]:arr[1],
+    while (arr) {
+        var src = arr[2] ? arr[2] : arr[1],
             reg2 = /<img.*?class=("(.*?)"|'(.*?)')?.*?>/,
-            arr2 = htmlStr.match(reg2),cls="";
-        if(arr2&&arr2[3]){
-            cls=arr2[3];
-        }else if(arr2&&arr2[4]){
-            cls=arr2[4];
+            arr2 = htmlStr.match(reg2), cls = "";
+        if (arr2 && arr2[3]) {
+            cls = arr2[3];
+        } else if (arr2 && arr2[4]) {
+            cls = arr2[4];
         }
 
         var obj = {
-            cls:cls,
-            type:'img',
-            src:src,
-            content:''
+            cls: cls,
+            type: 'img',
+            src: src,
+            content: ''
         };
-        htmlStr = htmlStr.replace(reg,JSON.stringify(obj));
+        htmlStr = htmlStr.replace(reg, JSON.stringify(obj));
         arr = htmlStr.match(reg);
     }
 
@@ -103,12 +103,12 @@ function map_a() {//需要匹配class,href
 function map_input() {
 
 }
-function turn_arr(htmlStr){
-    htmlStr = htmlStr.replace(/\\+/g,"").replace(/\s/g,"").replace(/}\{/g,"},{").replace(/}"}/g,'}]}').replace(/}"}/g,'}]}')
-        .replace(/content":"\{/g,'content":[{').replace(/^\{/g,'[{').replace(/}$/g,'}]');
+function turn_arr(htmlStr) {
+    htmlStr = htmlStr.replace(/\\+/g, "").replace(/\s/g, "").replace(/}\{/g, "},{").replace(/}"}/g, '}]}').replace(/}"}/g, '}]}')
+        .replace(/content":"\{/g, 'content":[{').replace(/^\{/g, '[{').replace(/}$/g, '}]');
     return htmlStr;
 }
-var init = function(htmlStr) {
+var init = function (htmlStr) {
     htmlStr = map_title(htmlStr);
     htmlStr = map_img(htmlStr);
     var htmlArr = turn_arr(htmlStr);
