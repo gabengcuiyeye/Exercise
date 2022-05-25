@@ -1,0 +1,207 @@
+<html>
+  <head></head>
+  <body>
+    <script>
+      window.requestFileSystem =
+        window.requestFileSystem || window.webkitRequestFileSystem;
+
+      // window.requestFileSystem(type, size, successCallback, opt_errorCallback)
+
+      //请求文件系统后，系统会向成功回调传递 FileSystem 对象，其中包含指向该应用相应文件系统的根的 DirectoryEntry (fs.root)。
+      // function onInitFs(fs) {
+      //   console.log(fs.root);
+      //   fs.root.getFile(
+      //     "D:\\others\\Exercise\\others\\log.txt",
+      //     { create: true, exclusive: true },
+      //     function (fileEntry) {
+      //       console.log("success");
+      //       // fileEntry.isFile === true
+      //       // fileEntry.name == 'log.txt'
+      //       // fileEntry.fullPath == '/log.txt'
+      //     },
+      //     errorHandler
+      //   );
+      // }
+
+      function onInitFs(fs) {
+        console.log(fs.root);
+        fs.root.getFile(
+          "log.txt",
+          { create: true, exclusive: false },
+          function (fileEntry) {
+            console.log(999999, fileEntry);
+
+            // Create a FileWriter object for our FileEntry (log.txt).
+            fileEntry.createWriter(function (fileWriter) {
+              fileWriter.onwriteend = function (e) {
+                console.log("Write completed.");
+              };
+
+              fileWriter.onerror = function (e) {
+                console.log("Write failed: " + e.toString());
+              };
+              var blob = new Blob(["yunhongyao"], { type: "text/plain" });
+              fileWriter.write(blob);
+            }, errorHandler);
+
+            fileEntry.file(function (file) {
+              let reader = new FileReader();
+              reader.addEventListener("loadend", function () {
+                console.log(reader, reader.result);
+                // dictionary = JSON.parse(reader.result);
+              });
+              reader.readAsText(file);
+            });
+
+            // fileEntry.isFile === true;
+            // fileEntry.name == "log.txt";
+            // fileEntry.fullPath == "../log.txt";
+            // // Create a FileWriter object for our FileEntry (log.txt).
+            // fileEntry.createWriter(function (fileWriter) {
+            //   fileWriter.onwriteend = function (e) {
+            //     console.log("Write completed.");
+            //   };
+
+            //   fileWriter.onerror = function (e) {
+            //     console.log("Write failed: " + e);
+            //   };
+
+            //   // Create a new Blob and write it to log.txt.
+            //   // if (!window.BlobBuilder && window.WebKitBlobBuilder)
+            //   //     window.BlobBuilder = window.WebKitBlobBuilder; // in Chrome 12.
+            //   // var bb = new BlobBuilder();
+            //   // bb.append("some stuff");
+            //   // console.log("bb size:"+bb.size);
+            //   // bb.append('put some nice text in our file....');
+            //   // var ourData = bb.getBlob('text/plain');
+            //   // fileWriter.write(ourData);
+            // }, errorHandler);
+          },
+          errorHandler
+        );
+      }
+
+      function errorHandler(FileError) {
+        var msg = "";
+        switch (FileError.code) {
+          case FileError.QUOTA_EXCEEDED_ERR:
+            msg = "QUOTA_EXCEEDED_ERR";
+            break;
+          case FileError.NOT_FOUND_ERR:
+            msg = "NOT_FOUND_ERR";
+            break;
+          case FileError.SECURITY_ERR:
+            msg = "SECURITY_ERR";
+            break;
+          case FileError.INVALID_MODIFICATION_ERR:
+            msg = "INVALID_MODIFICATION_ERR";
+            break;
+          case FileError.INVALID_STATE_ERR:
+            msg = "INVALID_STATE_ERR";
+            break;
+          default:
+            msg = "Unknown Error";
+            break;
+        }
+        console.log(
+          "error: " + msg,
+          FileError.ABORT_ERR,
+          FileError.code,
+          typeof e
+        );
+      }
+
+      //为了将 PERSISTENT 存储与 FileSystem API 配合使用，Chrome 浏览器使用基于 window.webkitStorageInfo 的新 API 以请求存储
+      //   window.requestFileSystem(
+      //     window.TEMPORARY,
+      //     5 * 1024 * 1024 /*5MB*/,
+      //     onInitFs,
+      //     errorHandler
+      //   );
+
+      window.requestFileSystem(
+        window.PERSISTENT,
+        5 * 1024 * 1024,
+        onInitFs,
+        errorHandler
+      );
+
+      //   window.webkitStorageInfo.requestQuota(
+      //     PERSISTENT,
+      //     1024 * 1024,
+      //     function (grantedBytes) {
+      //       window.requestFileSystem(
+      //         PERSISTENT,
+      //         grantedBytes,
+      //         onInitFs,
+      //         errorHandler
+      //       );
+      //     },
+      //     function (e) {
+      //       console.log("Error", e);
+      //     }
+      //   );
+
+      //   (function () {
+      //     "use strict";
+
+      //     // Chrome uses prefixes
+      //     var fs = window.requestFileSystem || window.webkitRequestFileSystem,
+      //       Blob = window.BlobBuilder || window.WebKitBlobBuilder;
+
+      //     var onError;
+
+      //     var onInitFS = function (fs) {
+      //       console.log("INFO: opened file system " + fs.name);
+      //       console.log(fs.root);
+      //       fs.root.getFile(
+      //         "/dev/stdout",
+      //         { create: false },
+      //         function (fileEntry) {
+      //           fileEntry.createWriter(function (fileWriter) {
+      //             fileWriter.onwriteend = function (e) {
+      //               console.log("Write completed.");
+      //             };
+      //             fileWriter.onerror = function (err) {
+      //               console.log("Write failed: " + err.toString());
+      //             };
+
+      //             var bb = new Blob();
+      //             bb.append("Lorem Ipsum");
+      //             fileWriter.write(bb.getBlob("text/plain"));
+      //           }, onError);
+      //         },
+      //         onError
+      //       );
+      //     };
+
+      //     onError = function (FileError) {
+      //       var msg;
+      //       switch (FileError.code) {
+      //         case FileError.QUOTA_EXCEEDED_ERR:
+      //           msg = "QUOTA_EXCEEDED_ERR";
+      //           break;
+      //         case FileError.NOT_FOUND_ERR:
+      //           msg = "NOT_FOUND_ERR";
+      //           break;
+      //         case FileError.SECURITY_ERR:
+      //           msg = "SECURITY_ERR";
+      //           break;
+      //         case FileError.INVALID_MODIFICATION_ERR:
+      //           msg = "INVALID_MODIFICATION_ERR";
+      //           break;
+      //         case FileError.INVALID_STATE_ERR:
+      //           msg = "INVALID_STATE_ERR";
+      //           break;
+      //         default:
+      //           msg = "Unknown Error";
+      //           break;
+      //       }
+      //       console.log("ERROR: " + msg);
+      //     };
+
+      //     fs(window.PERSISTENT, 10 * 1024, onInitFS, onError);
+      //   })();
+    </script>
+  </body>
+</html>
