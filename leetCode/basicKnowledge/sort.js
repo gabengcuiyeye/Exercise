@@ -47,4 +47,29 @@ function insertionSort(arr) {
   return arr;
 }
 
-console.log(insertionSort([3, 2, 1]));
+// console.log(insertionSort([3, 2, 1]));
+
+/*选择排序（Selection sort）是一种简单直观的排序算法。
+它的工作原理是：第一次从待排序的数据元素中选出最小（或最大）的一个元素，
+存放在序列的起始位置，然后再从剩余的未排序元素中寻找到最小（大）元素，然后放到已排序的序列的末尾。
+以此类推，直到全部待排序的数据元素的个数为零 */
+
+function selectionSort(arr) {
+  function swap(a, b) {
+    let temp = arr[b];
+    arr[b] = arr[a];
+    arr[a] = temp;
+  }
+  for (let i = 0; i < arr.length; i++) {
+    let minIndex = i;
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[minIndex] > arr[j]) {
+        minIndex = j;
+      }
+    }
+    swap(i, minIndex);
+  }
+  return arr;
+}
+
+console.log(selectionSort([4, 3, 2, 1]));
