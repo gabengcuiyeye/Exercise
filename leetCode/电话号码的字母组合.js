@@ -46,20 +46,30 @@ function combination(str) {
 
   let result = [];
   let strTemp = "";
-  const loopTree = (tree, deep = 0) => {
-    if (!tree.length) {
-      result.push(strTemp);
-      strTemp = "";
+  const loopTree = (tree, str, deep = 0) => {
+    let current = tree[0];
+    let stack = [];
+    while (current) {
+      str += current.value;
+      stack.push(current);
+      current = current.child[0];
     }
-    tree.forEach((node) => {
-      if (deep !== 0) {
-        strTemp += node.value;
-      }
-      if (node.child.length) {
-        result.push(strTemp);
-      }
-      loopTree(node.child, (deep = deep + 1));
-    });
+
+    if (stack.length) {
+    }
+    // if (!tree.length) {
+    //   result.push(strTemp);
+    //   strTemp = "";
+    // }
+    // tree.forEach((node) => {
+    //   if (deep !== 0) {
+    //     strTemp += node.value;
+    //   }
+    //   if (node.child.length) {
+    //     result.push(strTemp);
+    //   }
+    //   loopTree(node.child, (deep = deep + 1));
+    // });
   };
 
   loopTree(tree);
