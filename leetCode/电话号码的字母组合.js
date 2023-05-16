@@ -80,4 +80,35 @@ function combination(str) {
  * 暴力解法
  */
 
-console.log(combination("234"));
+// console.log(combination("234"));
+
+function solutionV2(str) {
+  const map = {
+    2: ["a", "b", "c"],
+    3: ["d", "e", "f"],
+    4: ["g", "h", "i"],
+    5: ["j", "k", "l"],
+    6: ["m", "n", "o"],
+    7: ["p", "q", "r", "s"],
+    8: ["t", "u", "v"],
+    9: ["w", "x", "y", "z"],
+  };
+  const arr = str.split("");
+
+  let res = [];
+  function loop(arr, result = [], index = 0) {
+    if (index === arr.length) {
+      res.push(result.join(""));
+      return;
+    }
+    let tempArr = map[arr[index]];
+    for (let j = 0; j < tempArr.length; j++) {
+      result[index] = tempArr[j];
+      loop(arr, result, index + 1);
+    }
+  }
+  loop(arr);
+  return res;
+}
+
+console.log(solutionV2("23"));

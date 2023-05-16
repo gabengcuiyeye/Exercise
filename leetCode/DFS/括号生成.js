@@ -34,4 +34,40 @@ function solution(n) {
   return result;
 }
 
-console.log(solution(2));
+// console.log(solution(2));
+
+function solutionV2(n) {
+  function loop(current = [], pos = 0, result = []) {
+    if (pos === n * 2) {
+      if (isValid(current)) {
+        result.push([...current]);
+      }
+    } else {
+      current[pos] = "(";
+      loop(current, pos + 1, result);
+      current[pos] = ")";
+      loop(current, pos + 1, result);
+    }
+  }
+
+  function isValid(current) {
+    let balance = 0;
+    for (let c of current) {
+      if (c === "(") {
+        ++balance;
+      } else {
+        --balance;
+      }
+      if (balance < 0) {
+        return false;
+      }
+    }
+    return balance === 0;
+  }
+
+  let result = [];
+  loop([], 0, result);
+  return result;
+}
+
+console.log(solution(3));
