@@ -1,3 +1,4 @@
+use crate::expr_ast::{CompUnit, FuncDef, Block, Stmt, FuncType };
 // lalrpop 里的约定
 grammar;
 
@@ -12,22 +13,22 @@ match {
 
 // 定义 CompUnit, 其返回值类型为 String
 // parser 在解析完成后的行为是返回 FuncDef 的值
-pub CompUnit: String = <func_def: FuncDef> => func_def;
+// pub CompUnit: String = <func_def: FuncDef> => func_def;
 
 // 同上, 不解释
-FuncDef: String = {
-  <func_type: FuncType> <id: Ident> "(" ")" <block: Block> => {
-    format!("{} {}() {}", func_type, id, block)
-  }
-}
+// FuncDef: String = {
+//   <func_type: FuncType> <id: Ident> "(" ")" <block: Block> => {
+//     format!("{} {}() {}", func_type, id, block)
+//   }
+// }
 
-FuncType: String = "int" => "int".to_string();
+// FuncType: String = "int" => "int".to_string();
 
-Block: String = "{" <stmt: Stmt> "}" => format!("{{ {} }}", stmt);
+// Block: String = "{" <stmt: Stmt> "}" => format!("{{ {} }}", stmt);
 
-Stmt: String = "return" <num: Number> ";" => format!("return {};", num);
+// Stmt: String = "return" <num: Number> ";" => format!("return {};", num);
 
-Number: String = <num: IntConst> => num.to_string();
+// Number: String = <num: IntConst> => num.to_string();
 
 // 如果匹配到标识符, 就返回这个字符串
 // 一对尖括号在此处指代的是正则表达式匹配到的字符串 (&str)
@@ -40,3 +41,26 @@ IntConst: i32 = {
   r"0[0-7]*" => i32::from_str_radix(<>, 8).unwrap(),
   r"0[xX][0-9a-fA-F]+" => i32::from_str_radix(&<>[2..], 16).unwrap(),
 }
+
+
+
+
+// 2023-10-30 生成ast
+
+
+pub CompUnit: CompUnit = <func_def: FuncDef> => CompUnit { <> };
+
+FuncDef: FuncDef = {
+  <func_type: FuncType> <ident: Ident> "(" ")" <block: Block> => {
+    FuncDef { <> }
+  }
+}
+
+FuncType: FuncType = "int" => FuncType::Int;
+
+Block: Block = "{" <stmt: Stmt> "}" => Block { <> };
+
+Stmt: Stmt = "return" <num: Number> ";" => Stmt { <> };
+
+Number: i32 = <num: IntConst> => <>;
+
