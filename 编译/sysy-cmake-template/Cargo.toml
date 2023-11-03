@@ -8,7 +8,9 @@ edition = "2021"
 
 [build-dependencies]
 lalrpop = "0.19.7"
+rand = "0.8.5"
 
 
 [dependencies]
 lalrpop-util = { version = "0.19.7", features = ["lexer"] }
+rand = "0.8.5"
