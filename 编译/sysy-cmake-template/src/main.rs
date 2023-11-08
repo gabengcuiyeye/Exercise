@@ -35,5 +35,5 @@
 mod game;
 
 fn main() {
-    game::test();
+    game::test2();
 }
