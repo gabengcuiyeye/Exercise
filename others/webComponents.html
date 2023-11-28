@@ -34,6 +34,11 @@
         <x-option value="third"></x-option>
     </x-select>
 
+    <!-- slot插槽 -->
+    <my-component id="myComponent" title="这是一个大标题111">
+        <h2>这是副标题</h2>
+    </my-component>
+
     <!-- 用户卡片 -->
     <user-card image="https://semantic-ui.com/images/avatar2/large/kristy.png" name="User Name"
         email="yourmail@some-email.com"></user-card>
@@ -101,6 +106,18 @@
             <p class="email"></p>
             <button class="button">Follow John</button>
         </div>
+    </template>
+
+
+    <!-- slot插槽 -->
+    <template id="myTemplate">
+        <style>
+            h1 {
+                color: red;
+            }
+        </style>
+        <h1 id="title">这是一个大标题</h1>
+        <slot></slot>
     </template>
     <script>
         class UserCard extends HTMLElement {
@@ -181,6 +198,36 @@
         }
 
         customElements.define('x-select', XSelectElement);
+
+
+
+
+        // slot插槽以及数据驱动
+        class MyComponent extends HTMLElement {
+            constructor() {
+                super();
+                const template = document.querySelector('#myTemplate')
+                const content = template.content.cloneNode(true)
+                const title = content.querySelector('#title')
+                this.$title = title
+                const propTitle = this.getAttribute('title')
+                title.innerText = propTitle
+                const shadowRoot = this.attachShadow({mode: 'open'})
+                shadowRoot.appendChild(content)
+            }
+            static get observedAttributes() {
+                return ['title']
+            }
+            attributeChangedCallback() {
+                const propTitle = this.getAttribute('title')
+                this.$title.innerText = propTitle
+            }
+        }
+        customElements.define('my-component', MyComponent);
+        document.querySelector('#myComponent').addEventListener('click', e => {
+            e.target.setAttribute('title', '传入的标题被修改了')
+        })
+
     </script>
 </body>
 
